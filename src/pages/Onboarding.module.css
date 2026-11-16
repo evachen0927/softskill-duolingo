@@ -1,0 +1,136 @@
+.page {
+  max-width: 480px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+.step { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+.h1 { font-size: 22px; line-height: 1.4; margin: 0 0 6px; }
+.sub { color: var(--muted); margin: 0 0 20px; line-height: 1.6; }
+
+.options { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.option {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px 12px 48px;
+  position: relative;
+  text-align: left;
+  font: inherit;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.option::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  margin-top: -11px;
+  border: 2px solid #A9B4C2;
+  border-radius: 6px;
+  background: #fff;
+}
+.option[aria-checked='true'] { border-color: var(--brand); background: var(--brand-soft); }
+.option[aria-checked='true']::before {
+  border-color: var(--brand);
+  background: var(--brand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center / 16px no-repeat;
+}
+.option:focus-visible, .primary:focus-visible, .select:focus-visible, .highfive:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
+}
+.or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  margin: 16px 0 10px;
+}
+.or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+.spacer { flex: 1; min-height: 20px; }
+.primary {
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--brand);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 17px;
+  cursor: pointer;
+}
+.primary:disabled { background: #B8C3D0; cursor: not-allowed; }
+.hint { color: var(--muted); font-size: 13px; text-align: center; margin: 8px 0 0; min-height: 20px; }
+
+/* 承諾頁 */
+.promise {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.promiseBig { font-size: 20px; font-weight: 700; margin: 0 0 4px; color: var(--brand); }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.label { font-weight: 700; }
+.select {
+  min-height: 48px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 17px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+}
+.small { color: var(--muted); font-size: 13px; margin: 0; }
+
+.highfiveWrap { display: flex; flex-direction: column; align-items: center; margin-top: 12px; overflow: visible; }
+.highfive {
+  width: 220px;
+  min-height: 200px;
+  display: grid;
+  place-items: center;
+  overflow: visible; /* 擊掌火花靠近畫布邊緣，所有外層都不能切掉 */
+  padding: 0;
+  border: 0;
+  border-radius: 28px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none; /* 讓滑動手勢交給我們處理，不捲動頁面 */
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.highfive > * { pointer-events: none; }
+.highfive:disabled { cursor: default; }
+.highfiveLabel { font-weight: 700; margin: 10px 0 0; }
+.success { color: #2E7D32; font-weight: 700; margin: 10px 0 0; text-align: center; }
+
+
+/* 通知步驟 */
+.notifBuddy { width: 160px; margin: 8px auto 12px; }
+.note { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 10px 0 0; }
+.secondary {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 10px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.secondary:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }

@@ -1,0 +1,42 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 事件：只有已登入（匿名）的使用者能新增；任何人都不能讀、改、刪。
+    match /events/{eventId} {
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+             'device_id', 'uid', 'type', 'question_id', 'choice', 'correct', 'feedback',
+             'slot', 'review', 'permission', 'platform', 'standalone', 'ts'
+           ])
+        && request.resource.data.type in [
+             'onboarding_done', 'commit', 'notif_permission', 'answer',
+             'explanation_viewed', 'feedback', 'day_complete'
+           ]
+        && request.resource.data.device_id is string
+        && request.resource.data.ts is string
+        && request.resource.data.platform in ['ios', 'android', 'desktop']
+        && request.resource.data.standalone is bool;
+      allow read, update, delete: if false;
+    }
+
+    // 推播訂閱：每人一份，文件 id = 自己的 uid，只有本人能讀寫。
+    match /push_subs/{uid} {
+      function isOwner() {
+        return request.auth != null && request.auth.uid == uid;
+      }
+      allow read, delete: if isOwner();
+      allow create, update: if isOwner()
+        && request.resource.data.keys().hasOnly([
+             'fcm_token', 'reminder_time', 'timezone', 'last_completed_date', 'last_notified_date'
+           ]);
+    }
+
+    // 其他路徑一律拒絕
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

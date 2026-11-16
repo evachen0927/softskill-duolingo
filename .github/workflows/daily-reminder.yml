@@ -1,0 +1,34 @@
+name: 每日提醒
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # 每 15 分鐘（UTC）；腳本內一律以使用者時區判斷
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '只印出會發給誰，不真的發送'
+        type: boolean
+        default: true
+
+concurrency:
+  group: daily-reminder
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: 發送提醒
+        run: npx tsx scripts/send-reminders.ts ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) && '--dry-run' || '' }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}

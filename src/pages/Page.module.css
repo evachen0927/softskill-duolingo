@@ -1,0 +1,62 @@
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 20px calc(88px + env(safe-area-inset-bottom));
+}
+.h1 { font-size: 24px; margin: 8px 0 4px; }
+.sub { color: var(--muted); margin: 0 0 16px; }
+.hero { display: block; margin: 8px auto 16px; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 16px;
+}
+.badge {
+  display: inline-block;
+  margin: 0 0 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 700;
+}
+.body { margin: 8px 0; line-height: 1.6; }
+.list { margin: 8px 0 0; padding-left: 20px; line-height: 1.9; }
+.review {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #FFF4D6;
+  color: #8A5A00;
+  font-size: 12px;
+  font-weight: 700;
+}
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: 16px;
+  border-radius: 12px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+button.button { width: 100%; border: 0; font: inherit; font-weight: 700; cursor: pointer; }
+.card .button + .button { margin-top: 10px; }
+.danger { background: #C0392B; }
+.ghost { background: transparent; color: var(--text); border: 2px solid var(--line) !important; }
+.pre {
+  margin: 0;
+  max-height: 50vh;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.link { color: var(--brand); font-weight: 700; }

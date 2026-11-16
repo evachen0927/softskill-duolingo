@@ -1,0 +1,19 @@
+.wrap { margin: 0; }
+.title { font-size: 16px; margin: 0 0 8px; }
+.table { width: 100%; border-collapse: collapse; table-layout: fixed; text-align: center; }
+.table th { font-size: 12px; font-weight: 400; color: var(--muted); padding: 4px 0; }
+.table td { padding: 3px 0; }
+.day {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.future { color: #A9B4C2; }
+.done { background: var(--brand); color: #fff; font-weight: 700; }
+.today { box-shadow: 0 0 0 2px var(--brand) inset; font-weight: 700; color: var(--brand); }
+.done.today { box-shadow: 0 0 0 2px #fff inset, 0 0 0 2px var(--brand); color: #fff; }

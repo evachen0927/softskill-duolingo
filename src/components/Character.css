@@ -1,0 +1,86 @@
+/* ===== 以下照抄 docs/characters/motion-spec.md 第 5 節 ===== */
+
+/* 共用：要動的圖層用自身外框當軸心 */
+.char svg #eye-l, .char svg #eye-r { transform-box: fill-box; transform-origin: 50% 50%; }
+.char svg #sprout { transform-box: fill-box; transform-origin: 40% 100%; }
+.char svg #tie    { transform-box: fill-box; transform-origin: 50% 0%; }
+.char svg #bob    { transform-box: fill-box; transform-origin: 50% 100%; }
+.char svg #art    { transform-box: fill-box; transform-origin: 50% 100%; }
+
+/* 眨眼：由 JS 加上 .blink，結束後移除 */
+@keyframes blink { 0%,100% { transform: scaleY(1); } 45%,55% { transform: scaleY(.12); } }
+.char.blink svg #eye-l, .char.blink svg #eye-r { animation: blink 160ms cubic-bezier(.4,0,.2,1); }
+
+/* 夥伴：呼吸＋捲芽 */
+@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-0.5px); } } /* 單位＝viewBox 單位（SVG 內 px 即 user unit） */
+.buddy svg #bob { animation: bob 2.8s cubic-bezier(.45,0,.55,1) infinite alternate; }
+@keyframes sprout { 0%,33%,100% { transform: rotate(0); } 11% { transform: rotate(6deg); } 22% { transform: rotate(-4deg); } }
+.buddy svg #sprout { animation: sprout 3.6s cubic-bezier(.37,0,.63,1) infinite; }
+
+/* 上司：領帶輕擺；出題中只擺一次 */
+@keyframes tie { 0%,28%,100% { transform: rotate(0); } 9% { transform: rotate(2.5deg); } 19% { transform: rotate(-2deg); } }
+.boss svg #tie { animation: tie 5s cubic-bezier(.37,0,.63,1) infinite; }
+.boss.is-asking svg #tie { animation-iteration-count: 1; animation-duration: 2s; }  /* 前 2s 擺一次後停 */
+
+/* 狀態切換 */
+@keyframes enter { from { transform: translate(-12%,10%) rotate(-6deg); opacity: 0; } 25% { opacity: 1; } to { transform: none; opacity: 1; } }
+.boss.entering svg #art { animation: enter 480ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes squash { 0%,100% { transform: scale(1,1); } 35% { transform: scale(.97,1.05); } 70% { transform: scale(1.02,.97); } }
+.boss.correct svg #art { animation: squash 520ms cubic-bezier(.34,1.56,.64,1); }
+@keyframes pat { 0%,50%,100% { transform: translateY(0); } 25% { transform: translateY(6px); } 75% { transform: translateY(4px); } }
+.boss.wrong svg #arm-r { animation: pat 640ms cubic-bezier(.45,0,.55,1); }
+
+/* 暫停／減少動態 */
+.char.is-paused svg * { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) {
+  .char svg * { animation: none !important; }
+  .char-swap { transition: opacity 150ms linear; }
+}
+
+/* ===== 以下是 motion-spec 第 3 節表格寫成的 CSS（原稿沒有附片段） ===== */
+
+/* 上司答對：讚的手彈出（origin 100% 100%），320ms，延遲 80ms */
+.boss svg #arm-r { transform-box: fill-box; transform-origin: 100% 100%; }
+@keyframes thumbs { from { transform: rotate(-14deg); } to { transform: rotate(0); } }
+.boss.correct svg #arm-r { animation: thumbs 320ms cubic-bezier(.34,1.56,.64,1) 80ms both; }
+/* 上司答錯：拍拍的手軸心在中心 */
+.boss.wrong svg #arm-r { transform-origin: 50% 50%; }
+/* 回饋動作播完之前不跑領帶循環；出題中 #arm-r 本來就沒有動畫 */
+.boss.is-feedback svg #tie { animation: none; }
+
+/* 夥伴擊掌：三個動畫各播一次 */
+.buddy svg #arm-r { transform-box: fill-box; transform-origin: 0% 100%; }
+.buddy svg #sparks { transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes highfiveArm { from { transform: rotate(8deg); } to { transform: rotate(0); } }
+@keyframes sparksIn { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes sparksOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes bobJump { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-1.2px); } }
+.buddy.highfive svg #arm-r { animation: highfiveArm 200ms cubic-bezier(.2,.9,.3,1.3) both; }
+/* 火花：260ms 放大淡入，結束 900ms 後 300ms 淡出，之後一直保持隱藏（只彈一次、不閃） */
+.buddy.highfive svg #sparks {
+  animation:
+    sparksIn 260ms cubic-bezier(.22,1,.36,1) both,
+    sparksOut 300ms linear 1160ms forwards;
+}
+/* 跳一下（腳不離地：#legs 不在 #bob 裡），跳完接回呼吸 */
+.buddy.highfive svg #bob {
+  animation:
+    bobJump 360ms cubic-bezier(.34,1.56,.64,1),
+    bob 2.8s cubic-bezier(.45,0,.55,1) 360ms infinite alternate;
+}
+
+/* ===== 外層容器 ===== */
+.char {
+  position: relative;
+  display: grid;
+  overflow: visible;
+  -webkit-tap-highlight-color: transparent;
+}
+.char-swap { grid-area: 1 / 1; overflow: visible; }
+.char svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* 減少動態：狀態切換改成 150ms 淡入淡出 */
+@keyframes charFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes charFadeOut { from { opacity: 1; } to { opacity: 0; } }
+.char-swap.is-entering { animation: charFadeIn var(--swap-ms, 150ms) linear both; }
+.char-swap.is-leaving { animation: charFadeOut var(--swap-ms, 150ms) linear both; pointer-events: none; }

@@ -1,0 +1,258 @@
+/* 版位照 docs/characters/size-mock.png（390 寬）：頂欄 44 → 上司 109×120（x=16）→ 情境卡 → 選項靠底（56 高、間距 12）→ 底部 24 */
+.page {
+  position: relative;
+  isolation: isolate;
+  max-width: 480px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+/* 情境背景只鋪在頂欄＋上司區（題目卡以上），題目卡和選項放在淺色底上，好讀 */
+.bg {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(env(safe-area-inset-top) + 44px + 4px + 132px + 40px);
+  z-index: -1;
+  background-color: #DCE2EA;
+  background-size: cover;
+  background-position: center;
+  transition-property: filter;
+  transition-timing-function: ease;
+}
+
+.top {
+  height: 44px;
+  margin: 0 -16px;
+  padding: 0 16px 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(243, 243, 241, 0.92);
+}
+.close {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  border-radius: 12px;
+}
+.close:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
+.streak { display: flex; align-items: center; gap: 8px; font-size: 16px; color: var(--text); }
+.dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #FF9F43;
+  box-shadow: 0 0 0 5px #FFE8D2;
+}
+.flex { flex: 1; }
+.review {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #FFF4D6;
+  color: #8A5A00;
+  font-size: 13px;
+  font-weight: 700;
+}
+.count {
+  min-width: 56px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: #E3E8EF;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.bar { height: 4px; margin: 0 -16px; background: rgba(0, 0, 0, 0.06); }
+.fill { height: 100%; background: var(--brand); transition: width 0.4s ease; }
+
+/* 上司區：高 12 + 120；上司底邊貼齊（壓在）情境卡上緣 */
+.stage { position: relative; height: 132px; flex: none; }
+.bossSlot {
+  position: absolute;
+  left: 0; /* page 左右 padding 16 → x = 16 */
+  bottom: -2px; /* 往下壓 2px 到卡片後面，壓扁回彈時也不露縫 */
+  width: 109px;
+  z-index: 1;
+  overflow: visible;
+}
+.enterSlot {
+  position: absolute;
+  left: -6px;
+  bottom: -2px;
+  width: 150px;
+  z-index: 1;
+  overflow: visible;
+  transform-origin: 0% 100%;
+}
+.landing { animation: land 120ms linear forwards; }
+@keyframes land { to { opacity: 0; transform: scale(0.73); } }
+.fadeIn { animation: fade 120ms linear both; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* 對話泡泡：238 寬，最多 2 行 */
+.bubble {
+  position: absolute;
+  left: 123px; /* x = 16 + 109 + 14 = 139 */
+  right: -3px;
+  top: 19px;
+  margin: 0;
+  padding: 12px 14px;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1.5px solid #D5DAE1;
+  border-radius: 16px;
+  font-size: 16px;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  animation: fade 200ms linear both;
+}
+.bubble::before {
+  content: '';
+  position: absolute;
+  left: -9px;
+  top: 30px;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-left: 1.5px solid #D5DAE1;
+  border-bottom: 1.5px solid #D5DAE1;
+  transform: rotate(45deg);
+}
+
+/* 情境卡：最小 140，長情境會往下延伸 */
+.card {
+  position: relative;
+  z-index: 2;
+  min-height: 140px;
+  background: #fff;
+  border: 1.5px solid #D5DAE1;
+  border-radius: 20px;
+  padding: 16px;
+}
+.meta { margin: 0 0 6px; color: var(--muted); font-size: 13px; font-weight: 700; }
+.scenario { margin: 0; line-height: 1.75; }
+.waiting { visibility: hidden; }
+.reveal { animation: fade 200ms linear both; }
+
+/* 選項靠底：56 高、間距 12、點了就送出 */
+.options {
+  list-style: none;
+  margin: auto 0 0;
+  padding: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.option {
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  text-align: left;
+  font: inherit;
+  line-height: 1.55;
+  color: var(--text);
+  background: #fff;
+  border: 1.5px solid #D5DAE1;
+  border-radius: 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.option:active { border-color: var(--brand); background: var(--brand-soft); }
+.option:disabled { cursor: default; }
+.option:focus-visible, .primary:focus-visible, .fb:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.key {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: #EEF1F5;
+  font-weight: 700;
+}
+
+.explain { margin-top: 14px; }
+.right, .wrong { margin: 0 0 10px; padding: 10px 14px; border-radius: 12px; font-weight: 700; font-size: 18px; }
+.right { background: #E6F4EA; color: #1E6B30; }
+.wrong { background: #FCE8E6; color: #A1281B; }
+.block {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  line-height: 1.7;
+}
+.block p { margin: 6px 0 0; }
+.answerBlock { border-color: #9CCFA9; }
+.skill { background: #EEF3FF; border-color: transparent; }
+.h2 { font-size: 16px; margin: 0; }
+.quote { color: var(--muted); font-size: 15px; border-left: 3px solid var(--line); padding-left: 10px; }
+.others { margin: 6px 0 0; padding: 0; list-style: none; }
+.others li + li { margin-top: 6px; }
+
+.feedback {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 14px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 14px;
+}
+.fbLabel { font-size: 14px; flex: 1; }
+.fb {
+  width: 48px;
+  height: 44px;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  background: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+.fb[aria-pressed='true'] { border-color: var(--brand); background: var(--brand-soft); }
+
+.primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--brand);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 17px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.donePage { max-width: 480px; margin: 0 auto; padding: 60px 20px; text-align: center; }
+.h1 { font-size: 22px; }
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble, .reveal, .fadeIn { animation: fade 150ms linear both; }
+}

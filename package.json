@@ -1,0 +1,43 @@
+{
+  "name": "softskill-duolingo",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && tsc --noEmit -p tsconfig.sw.json && vite build",
+    "preview": "vite preview",
+    "test": "TZ=UTC vitest run && TZ=Asia/Taipei vitest run",
+    "e2e": "playwright test",
+    "test:watch": "vitest",
+    "test:rules": "npx --yes firebase-tools@15 emulators:exec --only firestore --project demo-softskill \"vitest run --config vitest.rules.config.ts\"",
+    "emulators": "npx --yes firebase-tools@15 emulators:start --only auth,firestore --project demo-softskill",
+    "reminders:dry-run": "tsx scripts/send-reminders.ts --dry-run",
+    "export-events": "tsx scripts/export-events.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.sw.json && tsc --noEmit -p tsconfig.scripts.json"
+  },
+  "dependencies": {
+    "firebase": "^12.19.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "@playwright/test": "^1.65.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^22.20.5",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "firebase-admin": "^13.10.0",
+    "jsdom": "^31.0.1",
+    "tsx": "^4.23.15",
+    "typescript": "~5.6",
+    "vite": "^5.4.21",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^2.1.9",
+    "workbox-core": "^7.4.1",
+    "workbox-precaching": "^7.4.1"
+  }
+}

@@ -1,0 +1,23 @@
+:root {
+  --brand: #1F4E79;
+  --brand-soft: #E3EEF8;
+  --bg: #F6F8FB;
+  --surface: #FFFFFF;
+  --text: #1B2430;
+  --muted: #5B6675;
+  --line: #E2E7EE;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* 角色換圖的 150ms 淡入淡出（.char-swap）是規格要求的完成回饋，不關掉 */
+  *:not(.char-swap), *::before, *::after { animation: none !important; transition: none !important; }
+}
