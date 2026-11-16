@@ -56,7 +56,7 @@ describe('getOrCreateDailySet：當天第一次開始就固定', () => {
     setItem('journey_start', '2026-11-16');
     const now = new Date('2026-11-17T01:00:00Z'); // 台北 11/17 09:00，第 2 天
     const a = getOrCreateDailySet(now);
-    expect(a).toEqual({ date: '2026-11-17', question_ids: ['q001', 'q002', 'q003'], review: [true, true, true] });
+    expect(a).toEqual({ date: '2026-11-17', question_ids: ['q001', 'q002', 'q003'], review: [false, false, false] });
     expect(getItem('daily_set', null)).toEqual(a);
 
     // 就算題庫中途變了，同一天也沿用已存的題組
@@ -71,10 +71,12 @@ describe('getOrCreateDailySet：當天第一次開始就固定', () => {
     expect(d1.date).toBe('2026-11-16');
     expect(d1.review).toEqual([false, false, false]);
     expect(d2.date).toBe('2026-11-17');
-    expect(d2.review).toEqual([true, true, true]);
+    expect(d2.question_ids).toEqual(['q001', 'q002', 'q003']);
+    expect(d2.review).toEqual([false, false, false]);
+    expect(d1.question_ids).toEqual(['u1q1', 'u1q2', 'u1q3']);
   });
 
-  it('題庫目前是規格的 3 題', () => {
-    expect(QUESTION_BANK).toEqual(['q001', 'q002', 'q003']);
+  it('題庫是第 1 單元 3 題，後面接著既有題目', () => {
+    expect(QUESTION_BANK).toEqual(['u1q1', 'u1q2', 'u1q3', 'q001', 'q002', 'q003']);
   });
 });

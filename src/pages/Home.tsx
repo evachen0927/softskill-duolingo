@@ -12,7 +12,8 @@ export function Home() {
   const s = getPracticeState();
   const completions = getCompletions();
   const streak = currentStreak(completions, s.date);
-  const journey = journeyCompleted(completions, getItem<string | null>('journey_start', null));
+  const journeyStart = getItem<string | null>('journey_start', null);
+  const journey = journeyCompleted(completions, journeyStart);
   const started = s.index > 0 || s.pending !== null;
 
   return (
@@ -65,7 +66,7 @@ export function Home() {
       </section>
 
       <section className={styles.card}>
-        <MiniCalendar completions={completions} today={s.date} />
+        <MiniCalendar completions={completions} today={s.date} journeyStart={journeyStart} />
       </section>
 
       <section className={styles.card} aria-label="提醒設定">

@@ -13,7 +13,8 @@ export type EventType =
   | 'answer'
   | 'explanation_viewed'
   | 'feedback'
-  | 'day_complete';
+  | 'day_complete'
+  | 'feature_interest';
 
 export type Platform = 'ios' | 'android' | 'desktop';
 
@@ -31,6 +32,8 @@ export interface AppEvent {
   slot?: number | null;
   review?: boolean | null;
   permission?: PermissionResult | null;
+  /** feature_interest：哪個即將推出的分頁 */
+  tab?: string | null;
   platform: Platform;
   standalone: boolean;
   ts: string; // ISO 8601

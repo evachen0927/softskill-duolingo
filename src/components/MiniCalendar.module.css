@@ -14,6 +14,8 @@
   color: var(--text);
 }
 .future { color: #A9B4C2; }
+/* 第一次使用之前：比未來的日子更淡，也不用實心圓 */
+.beforeStart { color: #C5CED8; opacity: 0.4; }
 .done { background: var(--brand); color: #fff; font-weight: 700; }
 .today { box-shadow: 0 0 0 2px var(--brand) inset; font-weight: 700; color: var(--brand); }
 .done.today { box-shadow: 0 0 0 2px #fff inset, 0 0 0 2px var(--brand); color: #fff; }

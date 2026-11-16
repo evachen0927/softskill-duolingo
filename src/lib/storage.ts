@@ -11,7 +11,8 @@ export type StorageKey =
   | 'completions'
   | 'feedback'
   | 'journey_start'
-  | 'event_queue';
+  | 'event_queue'
+  | 'feature_interest';
 
 export function getItem<T>(key: StorageKey, fallback: T): T {
   try {

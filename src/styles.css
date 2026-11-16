@@ -6,6 +6,11 @@
   --text: #1B2430;
   --muted: #5B6675;
   --line: #E2E7EE;
+  --ok: #1E6B30;
+  --ng: #A1281B;
+  --ok-line: #1E6B30;
+  --ng-line: #C0392B;
+  --brand-deep: #133552;
   color-scheme: light;
 }
 * { box-sizing: border-box; }

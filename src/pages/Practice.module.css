@@ -1,179 +1,229 @@
-/* 版位照 docs/characters/size-mock.png（390 寬）：頂欄 44 → 上司 109×120（x=16）→ 情境卡 → 選項靠底（56 高、間距 12）→ 底部 24 */
+/* 出題：場景卡約 320px（390×844），文字 15px，選項靠底。解析第 1 步把所選項貼近底部抽屜。 */
 .page {
+  --dock-h: 0px;
   position: relative;
   isolation: isolate;
   max-width: 480px;
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
   margin: 0 auto;
-  padding: env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
-}
-/* 情境背景只鋪在頂欄＋上司區（題目卡以上），題目卡和選項放在淺色底上，好讀 */
-.bg {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: calc(env(safe-area-inset-top) + 44px + 4px + 132px + 40px);
-  z-index: -1;
-  background-color: #DCE2EA;
-  background-size: cover;
-  background-position: center;
-  transition-property: filter;
-  transition-timing-function: ease;
+  overflow: hidden;
+  background: var(--bg);
 }
 
 .top {
-  height: 44px;
-  margin: 0 -16px;
-  padding: 0 16px 0 4px;
+  height: 48px;
+  flex: none;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(243, 243, 241, 0.92);
+  padding: 0 12px 0 2px;
 }
 .close {
   width: 44px;
   height: 44px;
+  flex: none;
   display: grid;
   place-items: center;
   color: var(--muted);
   border-radius: 12px;
 }
-.close:focus-visible { outline: 3px solid var(--brand); outline-offset: -3px; }
-.streak { display: flex; align-items: center; gap: 8px; font-size: 16px; color: var(--text); }
-.dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #FF9F43;
-  box-shadow: 0 0 0 5px #FFE8D2;
+.close:focus-visible, .go:focus-visible, .option:focus-visible, .fb:focus-visible, .othersBtn:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 2px;
 }
-.flex { flex: 1; }
+.segments {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  height: 8px;
+  min-width: 0;
+}
+.seg, .segOn {
+  flex: 1;
+  background: #E3E8EF;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.seg > span, .segOn > span {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s ease;
+}
+.segOn > span { transform: scaleX(1); }
 .review {
-  padding: 3px 10px;
+  flex: none;
+  padding: 3px 8px;
   border-radius: 999px;
   background: #FFF4D6;
   color: #8A5A00;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
 }
 .count {
-  min-width: 56px;
-  padding: 4px 14px;
+  flex: none;
+  min-width: 52px;
+  padding: 4px 10px;
   border-radius: 999px;
   background: #E3E8EF;
   font-weight: 700;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
-.bar { height: 4px; margin: 0 -16px; background: rgba(0, 0, 0, 0.06); }
-.fill { height: 100%; background: var(--brand); transition: width 0.4s ease; }
 
-/* 上司區：高 12 + 120；上司底邊貼齊（壓在）情境卡上緣 */
-.stage { position: relative; height: 132px; flex: none; }
-.bossSlot {
-  position: absolute;
-  left: 0; /* page 左右 padding 16 → x = 16 */
-  bottom: -2px; /* 往下壓 2px 到卡片後面，壓扁回彈時也不露縫 */
-  width: 109px;
-  z-index: 1;
-  overflow: visible;
+.flow {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--dock-h);
 }
-.enterSlot {
-  position: absolute;
-  left: -6px;
-  bottom: -2px;
-  width: 150px;
-  z-index: 1;
-  overflow: visible;
-  transform-origin: 0% 100%;
-}
-.landing { animation: land 120ms linear forwards; }
-@keyframes land { to { opacity: 0; transform: scale(0.73); } }
-.fadeIn { animation: fade 120ms linear both; }
-@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.flowAsk { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
 
-/* 對話泡泡：238 寬，最多 2 行 */
-.bubble {
+/* 場景是圓角插圖槽，圖鋪滿卡片。泡泡疊在圖上；矮螢幕改放到圖的下面，避免蓋住插畫。 */
+.sceneBlock {
+  position: relative;
+  flex: none;
+  margin: 4px 16px 0;
+}
+.scene {
+  position: relative;
+  height: clamp(160px, calc(100dvh - 524px), 320px);
+  border-radius: 20px;
+  overflow: hidden;
+  background: #E6EEF6;
+}
+.sceneParked {
   position: absolute;
-  left: 123px; /* x = 16 + 109 + 14 = 139 */
-  right: -3px;
-  top: 19px;
+  width: 0;
+  height: 0;
   margin: 0;
-  padding: 12px 14px;
-  min-height: 76px;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+.sceneParked .scene { height: 0; }
+.sceneImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition-property: filter;
+  transition-timing-function: ease;
+}
+
+.who {
   display: flex;
   align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--muted);
+}
+.bell { width: 12px; height: 12px; flex: none; display: block; }
+.say {
+  margin: 2px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* 別人傳來：沒有尾巴的通知卡，靠場景右上 */
+.note {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: min(240px, calc(100% - 28px));
+  padding: 8px 12px 10px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(27, 36, 48, 0.16);
+}
+/* 上司開口：有尾巴的口語泡泡，尾巴朝下 */
+.talk {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  max-width: min(230px, calc(100% - 32px));
+  padding: 8px 12px 10px;
   background: #fff;
   border: 1.5px solid #D5DAE1;
   border-radius: 16px;
-  font-size: 16px;
-  line-height: 1.5;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  animation: fade 200ms linear both;
 }
-.bubble::before {
+.talk::after {
   content: '';
   position: absolute;
-  left: -9px;
-  top: 30px;
-  width: 14px;
-  height: 14px;
+  left: 22px;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
   background: #fff;
-  border-left: 1.5px solid #D5DAE1;
+  border-right: 1.5px solid #D5DAE1;
   border-bottom: 1.5px solid #D5DAE1;
   transform: rotate(45deg);
 }
 
-/* 情境卡：最小 140，長情境會往下延伸 */
-.card {
-  position: relative;
-  z-index: 2;
-  min-height: 140px;
-  background: #fff;
-  border: 1.5px solid #D5DAE1;
-  border-radius: 20px;
-  padding: 16px;
+/* 763px 以下：泡泡移到插畫下面，不再蓋住畫面 */
+@media (max-height: 763px) {
+  .note, .talk {
+    position: static;
+    width: auto;
+    max-width: none;
+    margin-top: 8px;
+  }
+  .talk::after { display: none; }
 }
-.meta { margin: 0 0 6px; color: var(--muted); font-size: 13px; font-weight: 700; }
-.scenario { margin: 0; line-height: 1.75; }
-.waiting { visibility: hidden; }
-.reveal { animation: fade 200ms linear both; }
 
-/* 選項靠底：56 高、間距 12、點了就送出 */
+.meta {
+  margin: 14px 16px 0;
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 700;
+}
+.scenario {
+  margin: 6px 16px 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.scenario strong { color: var(--text); font-weight: 700; }
+
 .options {
   list-style: none;
   margin: auto 0 0;
-  padding: 16px 0 0;
+  padding: 12px 16px 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
-.option {
+.option, .chosen {
   width: 100%;
   min-height: 56px;
   display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 12px 14px;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
   text-align: left;
   font: inherit;
-  line-height: 1.55;
+  font-size: 15px;
+  line-height: 1.45;
   color: var(--text);
   background: #fff;
   border: 1.5px solid #D5DAE1;
   border-radius: 16px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
+.option { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .option:active { border-color: var(--brand); background: var(--brand-soft); }
-.option:disabled { cursor: default; }
-.option:focus-visible, .primary:focus-visible, .fb:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
 .key {
   flex: none;
   width: 28px;
@@ -183,41 +233,35 @@
   place-items: center;
   background: #EEF1F5;
   font-weight: 700;
+  font-size: 14px;
 }
+.chosen { margin: auto 16px 12px; width: auto; }
 
-.explain { margin-top: 14px; }
-.right, .wrong { margin: 0 0 10px; padding: 10px 14px; border-radius: 12px; font-weight: 700; font-size: 18px; }
-.right { background: #E6F4EA; color: #1E6B30; }
-.wrong { background: #FCE8E6; color: #A1281B; }
-.block {
+.learn { padding: 16px 16px 8px; }
+.kicker { margin: 0; color: var(--brand); font-size: 13px; font-weight: 700; }
+.skill { margin: 4px 0 14px; font-size: 20px; font-weight: 700; line-height: 1.45; }
+.answer {
   background: #fff;
-  border: 1px solid var(--line);
+  border: 1.5px solid #9CCFA9;
   border-radius: 16px;
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  line-height: 1.7;
+  padding: 14px 14px 12px;
 }
-.block p { margin: 6px 0 0; }
-.answerBlock { border-color: #9CCFA9; }
-.skill { background: #EEF3FF; border-color: transparent; }
-.h2 { font-size: 16px; margin: 0; }
-.quote { color: var(--muted); font-size: 15px; border-left: 3px solid var(--line); padding-left: 10px; }
-.others { margin: 6px 0 0; padding: 0; list-style: none; }
-.others li + li { margin-top: 6px; }
+.answerTitle { margin: 0 0 8px; font-size: 16px; color: var(--ok); }
+.quote { margin: 0; font-size: 15px; line-height: 1.5; }
+.why { margin: 8px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
 
 .feedback {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 6px 0 14px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 14px;
+  gap: 8px;
+  margin: 8px 0 0;
+  min-height: 48px;
 }
-.fbLabel { font-size: 14px; flex: 1; }
+.fbLabel { font-size: 14px; flex: 1; line-height: 1.4; }
 .fb {
   width: 48px;
   height: 44px;
+  flex: none;
   border-radius: 12px;
   border: 2px solid var(--line);
   background: #fff;
@@ -226,24 +270,155 @@
 }
 .fb[aria-pressed='true'] { border-color: var(--brand); background: var(--brand-soft); }
 
-.primary {
+.othersBtn {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 8px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+}
+.otherList {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.otherList li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  background: #fff;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.yours {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #FCE8E6;
+  color: var(--ng);
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  width: min(480px, 100%);
+  margin: 0 auto;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: #fff;
+}
+.sheetOk { border-top: 4px solid var(--ok-line); box-shadow: 0 -8px 24px rgba(27, 36, 48, 0.06); }
+.sheetNg { border-top: 4px solid var(--ng-line); box-shadow: 0 -8px 24px rgba(27, 36, 48, 0.06); }
+.dockPlain {
+  background: linear-gradient(to top, var(--bg) 72%, rgba(246, 248, 251, 0));
+}
+.ok, .ng {
+  margin: 2px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.ok { color: var(--ok); }
+.ng { color: var(--ng); }
+.one {
+  margin: 10px 0 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border-radius: 12px;
+  font-size: 16px;
+  line-height: 1.45;
+}
+.go {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 52px;
+  min-height: 55px;
   border: 0;
+  border-bottom: 3px solid var(--brand-deep);
   border-radius: 14px;
   background: var(--brand);
   color: #fff;
   font: inherit;
   font-weight: 700;
   font-size: 17px;
-  text-decoration: none;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
-.donePage { max-width: 480px; margin: 0 auto; padding: 60px 20px; text-align: center; }
-.h1 { font-size: 22px; }
+.go:active { transform: translateY(2px); border-bottom-width: 1px; }
+
+.wrap { padding: 8px 16px 8px; text-align: center; }
+.buddy { width: 150px; margin: 8px auto 0; overflow: visible; }
+.wrapTitle { margin: 8px 0 0; font-size: 22px; font-weight: 700; }
+.wrapNext { margin: 6px 0 0; color: var(--muted); font-size: 15px; line-height: 1.5; }
+.cards {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  text-align: left;
+}
+.mini {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+  min-width: 0;
+}
+.miniLabel { margin: 0; color: var(--muted); font-size: 13px; font-weight: 700; }
+.miniValue { margin: 4px 0 8px; font-size: 18px; font-weight: 700; }
+.dots { list-style: none; display: flex; gap: 6px; margin: 0; padding: 0; }
+.dotOk, .dotNg {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+.dotOk { background: #E6F4EA; color: var(--ok); }
+.dotNg { background: #FCE8E6; color: var(--ng); }
+.week { list-style: none; display: flex; justify-content: space-between; margin: 0; padding: 0; gap: 2px; }
+.week li { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.weekLab { font-size: 10px; color: var(--muted); }
+.weekDot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.weekOn { background: var(--brand); color: #fff; font-weight: 700; }
+.weekOff { color: #C5CED8; opacity: 0.45; }
+.weekPop { animation: pop 420ms cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes pop { from { transform: scale(0.6); } to { transform: scale(1); } }
+
 .srOnly {
   position: absolute;
   width: 1px;
@@ -254,5 +429,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bubble, .reveal, .fadeIn { animation: fade 150ms linear both; }
+  .sheetOk, .sheetNg, .weekPop { animation: none; }
 }

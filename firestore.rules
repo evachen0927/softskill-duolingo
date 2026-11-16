@@ -9,12 +9,13 @@ service cloud.firestore {
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.keys().hasOnly([
              'device_id', 'uid', 'type', 'question_id', 'choice', 'correct', 'feedback',
-             'slot', 'review', 'permission', 'platform', 'standalone', 'ts'
+             'slot', 'review', 'permission', 'tab', 'platform', 'standalone', 'ts'
            ])
         && request.resource.data.type in [
              'onboarding_done', 'commit', 'notif_permission', 'answer',
-             'explanation_viewed', 'feedback', 'day_complete'
+             'explanation_viewed', 'feedback', 'day_complete', 'feature_interest'
            ]
+        && (request.resource.data.type != 'feature_interest' || request.resource.data.tab is string)
         && request.resource.data.device_id is string
         && request.resource.data.ts is string
         && request.resource.data.platform in ['ios', 'android', 'desktop']

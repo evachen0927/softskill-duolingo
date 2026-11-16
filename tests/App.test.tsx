@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { setItem } from '../src/lib/storage';
-import { render, screen, act } from '@testing-library/react';
+import { getItem, setItem } from '../src/lib/storage';
+import type { AppEvent } from '../src/lib/firebase';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { App } from '../src/App';
 
 function go(hash: string) {
@@ -38,9 +39,28 @@ describe('底部四個 tab（引導完成後）', () => {
     expect(screen.getByRole('link', { name: label })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', { name: '首頁' })).not.toHaveAttribute('aria-current');
     expect(screen.getByRole('link', { name: '回到首頁' })).toHaveAttribute('href', '#/');
-    // 佔位頁不假裝有功能：沒有按鈕或輸入框
-    expect(screen.queryAllByRole('button')).toHaveLength(0);
+    expect(screen.getByRole('button', { name: '我想要這個功能' })).toBeInTheDocument();
     expect(screen.queryAllByRole('textbox')).toHaveLength(0);
+  });
+
+  it('即將推出：我想要這個功能記一次 feature_interest，同一分頁不再問', () => {
+    render(<App />);
+    go('#/library');
+    fireEvent.click(screen.getByRole('button', { name: '我想要這個功能' }));
+    expect(screen.getByRole('status')).toHaveTextContent('收到，謝謝你告訴我們。');
+    expect(screen.queryByRole('button', { name: '我想要這個功能' })).not.toBeInTheDocument();
+    const logged = getItem<AppEvent[]>('event_queue', []).filter((e) => e.type === 'feature_interest');
+    expect(logged).toHaveLength(1);
+    expect(logged[0]).toMatchObject({ tab: '題庫' });
+
+    go('#/');
+    go('#/library');
+    expect(screen.getByRole('status')).toHaveTextContent('收到，謝謝你告訴我們。');
+    expect(getItem<AppEvent[]>('event_queue', []).filter((e) => e.type === 'feature_interest')).toHaveLength(1);
+
+    go('#/ai');
+    fireEvent.click(screen.getByRole('button', { name: '我想要這個功能' }));
+    expect(getItem<AppEvent[]>('event_queue', []).filter((e) => e.type === 'feature_interest').map((e) => e.tab)).toEqual(['題庫', 'AI 對話練習']);
   });
 
   it('不存在的路徑回到首頁，不出錯', () => {

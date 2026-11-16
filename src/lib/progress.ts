@@ -42,10 +42,24 @@ export interface CalendarCell {
   done: boolean;
   isToday: boolean;
   isFuture: boolean;
+  /** 使用者第一次使用（journey_start）之前的日子 */
+  beforeStart: boolean;
+}
+
+/** 今天所在的那一週（週日開頭）的 7 個日期。 */
+export function weekOf(today: string): string[] {
+  const [y, m, d] = today.split('-').map(Number);
+  const weekday = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  const start = addDays(today, -weekday);
+  return Array.from({ length: 7 }, (_, i) => addDays(start, i));
 }
 
 /** 當月日曆：回傳週日開頭的週列，月初前、月底後補 null。 */
-export function monthGrid(c: Completions, today: string): { year: number; month: number; weeks: (CalendarCell | null)[][] } {
+export function monthGrid(
+  c: Completions,
+  today: string,
+  journeyStart: string | null = null,
+): { year: number; month: number; weeks: (CalendarCell | null)[][] } {
   const [year, month] = today.split('-').map(Number);
   const first = `${year}-${String(month).padStart(2, '0')}-01`;
   const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
@@ -53,7 +67,14 @@ export function monthGrid(c: Completions, today: string): { year: number; month:
   const cells: (CalendarCell | null)[] = Array(firstWeekday).fill(null);
   for (let d = 1; d <= daysInMonth; d++) {
     const date = addDays(first, d - 1);
-    cells.push({ date, day: d, done: isDone(c, date), isToday: date === today, isFuture: date > today });
+    cells.push({
+      date,
+      day: d,
+      done: isDone(c, date),
+      isToday: date === today,
+      isFuture: date > today,
+      beforeStart: journeyStart != null && date < journeyStart,
+    });
   }
   while (cells.length % 7) cells.push(null);
   const weeks: (CalendarCell | null)[][] = [];

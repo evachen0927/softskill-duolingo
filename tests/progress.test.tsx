@@ -98,6 +98,15 @@ describe('當月日曆（monthGrid）', () => {
     expect(g.weeks.flat().find((x) => x?.date === '2026-11-10')!.done).toBe(false);
   });
 
+  it('第一次使用之前的日子標成 beforeStart，當天和之後不是', () => {
+    const g = monthGrid({}, '2026-11-16', '2026-11-16');
+    const cells = g.weeks.flat().filter((x) => x);
+    expect(cells.find((x) => x!.date === '2026-11-15')!.beforeStart).toBe(true);
+    expect(cells.find((x) => x!.date === '2026-11-16')!.beforeStart).toBe(false);
+    expect(cells.find((x) => x!.date === '2026-11-17')!.beforeStart).toBe(false);
+    expect(cells.find((x) => x!.date === '2026-11-17')!.isFuture).toBe(true);
+  });
+
   it('跨年的 1 月：2027/1/1 是週五，前面補 5 格', () => {
     const g = monthGrid({}, '2027-01-01');
     expect(g.weeks[0].slice(0, 5)).toEqual([null, null, null, null, null]);
@@ -127,7 +136,8 @@ describe('首頁畫面（假時間：台北 2026-11-16 21:00）', () => {
     expect(screen.getByRole('heading', { name: '2026 年 11 月' })).toBeInTheDocument();
     expect(screen.getByLabelText('11 月 15 日，已完成')).toBeInTheDocument();
     expect(screen.getByLabelText('11 月 16 日，今天')).toBeInTheDocument();
-    expect(screen.getByLabelText('11 月 13 日')).toBeInTheDocument(); // 未完成：只有日期
+    expect(screen.getByLabelText('11 月 13 日，開始使用前')).toHaveAttribute('data-before-start', 'true');
+    expect(screen.getByLabelText('11 月 13 日，開始使用前')).not.toHaveAttribute('data-done');
   });
 
   it('今天只做 2 題：「今天 2/3」＋「繼續練習」，連勝和 X／30 不算今天', () => {

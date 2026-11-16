@@ -58,7 +58,7 @@ export function App() {
   const current = placeholder ? path : '/';
   return (
     <>
-      {placeholder ? <ComingSoon {...placeholder} /> : <Home />}
+      {placeholder ? <ComingSoon key={path} {...placeholder} /> : <Home />}
       <TabBar current={current} />
     </>
   );

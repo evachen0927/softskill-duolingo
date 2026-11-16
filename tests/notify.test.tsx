@@ -15,7 +15,7 @@ vi.mock('../src/lib/backend', () => backend);
 import { askPermission, notifAvailability, skipPermission, syncPermissionFromBrowser } from '../src/lib/notify';
 import { registerPush, syncPushSub } from '../src/lib/push';
 import { flushQueue, logEvent } from '../src/lib/firebase';
-import { finishExplanation, submitAnswer } from '../src/lib/practice';
+import { advanceToLearn, finishExplanation, submitAnswer } from '../src/lib/practice';
 import { App } from '../src/App';
 import { REASSURE } from '../src/pages/NotifStep';
 
@@ -156,11 +156,13 @@ describe('push_subs（後端 mock）', () => {
     const now = new Date('2026-11-16T04:00:00Z');
     for (let i = 0; i < 2; i++) {
       submitAnswer('B', now);
+      advanceToLearn(now);
       finishExplanation(now);
     }
     await new Promise((r) => setTimeout(r, 0));
     expect(backend.savePushSub.mock.calls.some(([, f]) => 'last_completed_date' in f)).toBe(false);
     submitAnswer('B', now);
+    advanceToLearn(now);
     finishExplanation(now);
     await vi.waitFor(() => expect(backend.savePushSub).toHaveBeenCalledWith('uid-123', { last_completed_date: '2026-11-16' }));
   });

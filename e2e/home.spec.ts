@@ -52,6 +52,10 @@ test('第一次使用：連勝 0 沒有壓力文案', async ({ page }) => {
   await seed(page, []);
   await expect(page.getByTestId('streak')).toHaveText('0');
   await expect(page.getByText('今天練完就開始累積')).toBeVisible();
+  const faded = await page.locator('[data-before-start="true"]').count();
+  const day = await page.evaluate(() => Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei', day: 'numeric' }).format(new Date())));
+  expect(faded).toBe(day - 1);
+  await expect(page.locator('[data-before-start="true"][data-done]')).toHaveCount(0);
   await page.screenshot({ path: shot('04-home-first-day') });
 });
 
@@ -76,10 +80,12 @@ test('從首頁練完 3 題：回首頁連勝 +1、今天打勾', async ({ page 
   await seed(page, [1]);
   await expect(page.getByTestId('streak')).toHaveText('1');
   await page.getByRole('link', { name: '開始今天的練習' }).click();
-  for (const label of ['下一題', '下一題', '完成']) {
+  for (let i = 0; i < 3; i++) {
     await page.getByRole('button', { name: /^B/ }).click();
-    await page.getByRole('button', { name: label }).click();
+    await page.getByRole('button', { name: '繼續' }).click();
+    await page.getByRole('button', { name: '繼續' }).click();
   }
+  await page.getByRole('button', { name: '完成' }).click();
   await expect(page.getByText('今天完成了')).toBeVisible();
   await expect(page.getByTestId('streak')).toHaveText('2');
   await expect(page.getByTestId('journey')).toHaveText('已完成 2／30');

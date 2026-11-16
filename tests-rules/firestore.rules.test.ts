@@ -50,6 +50,12 @@ describe('events/', () => {
     await assertFails(addDoc(collection(db, 'events'), event('bob')));
   });
 
+  it('feature_interest 要帶分頁名稱', async () => {
+    const db = env.authenticatedContext('alice').firestore();
+    await assertSucceeds(addDoc(collection(db, 'events'), event('alice', { type: 'feature_interest', tab: '題庫' })));
+    await assertFails(addDoc(collection(db, 'events'), event('alice', { type: 'feature_interest' })));
+  });
+
   it('不在清單內的 type 或多餘欄位會被拒絕', async () => {
     const db = env.authenticatedContext('alice').firestore();
     await assertFails(addDoc(collection(db, 'events'), event('alice', { type: 'hack' })));
