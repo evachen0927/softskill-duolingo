@@ -56,6 +56,20 @@ describe('events/', () => {
     await assertFails(addDoc(collection(db, 'events'), event('alice', { type: 'feature_interest' })));
   });
 
+  it('新的回饋事件要符合列舉，文字最長 300 字', async () => {
+    const db = env.authenticatedContext('alice').firestore();
+    await assertSucceeds(addDoc(collection(db, 'events'), event('alice', { type: 'feedback_reason', reason: 'too_easy' })));
+    await assertSucceeds(addDoc(collection(db, 'events'), event('alice', { type: 'feedback_reason', reason: 'other', text: '太長' })));
+    await assertFails(addDoc(collection(db, 'events'), event('alice', { type: 'feedback_reason', reason: 'bored' })));
+    await assertFails(addDoc(collection(db, 'events'), event('alice', { type: 'feedback_reason', reason: 'other', text: '啊'.repeat(301) })));
+    await assertSucceeds(addDoc(collection(db, 'events'), event('alice', { type: 'unit_useful', unit_id: 'u1', answer: 'yes' })));
+    await assertFails(addDoc(collection(db, 'events'), event('alice', { type: 'unit_useful', unit_id: 'u1', answer: 'later' })));
+    await assertSucceeds(addDoc(collection(db, 'events'), event('alice', { type: 'feature_wish', tab: '題庫', text: '可以重練' })));
+    await assertFails(addDoc(collection(db, 'events'), event('alice', { type: 'feature_wish', tab: '題庫', text: '' })));
+    await assertSucceeds(addDoc(collection(db, 'events'), event('alice', { type: 'tab_view', tab: '題庫' })));
+    await assertFails(addDoc(collection(db, 'events'), event('alice', { type: 'tab_view' })));
+  });
+
   it('不在清單內的 type 或多餘欄位會被拒絕', async () => {
     const db = env.authenticatedContext('alice').firestore();
     await assertFails(addDoc(collection(db, 'events'), event('alice', { type: 'hack' })));

@@ -16,11 +16,28 @@ import {
 } from '../lib/practice';
 import { currentStreak, isDone, weekOf } from '../lib/progress';
 import { prefersReducedMotion } from '../lib/blink';
-import { getItem } from '../lib/storage';
+import { logEvent } from '../lib/firebase';
+import { getItem, setItem } from '../lib/storage';
 import { navigate } from '../router';
 import { Character } from '../components/Character';
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
+
+const DOWN_REASONS = [
+  { id: 'too_easy', label: '太簡單' },
+  { id: 'irrelevant', label: '跟我的工作無關' },
+  { id: 'unclear', label: '解析看不懂' },
+  { id: 'other', label: '其他' },
+] as const;
+
+const USEFUL = [
+  { id: 'yes', label: '用得到' },
+  { id: 'maybe', label: '可能' },
+  { id: 'no', label: '用不到' },
+] as const;
+
+type DownReason = (typeof DOWN_REASONS)[number]['id'];
+type UsefulAnswer = (typeof USEFUL)[number]['id'];
 
 function Rich({ text }: { text: string }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -113,12 +130,18 @@ export function Practice() {
   const othersRef = useRef<HTMLUListElement>(null);
   const [open, setOpen] = useState(false);
   const [feedback, setFb] = useState<Feedback | null>(null);
+  const [reasonSent, setReasonSent] = useState(false);
+  const [otherOn, setOtherOn] = useState(false);
+  const [otherText, setOtherText] = useState('');
 
   const pendingId = state.pending?.question_id ?? null;
   const phase = state.pending?.phase ?? null;
 
   useEffect(() => {
     setOpen(false);
+    setReasonSent(false);
+    setOtherOn(false);
+    setOtherText('');
     if (!pendingId) {
       setFb(null);
       return;
@@ -183,6 +206,20 @@ export function Practice() {
     if (!pending || feedback === v) return;
     setFeedback(pending, v);
     setFb(v);
+    if (v !== 'down') setOtherOn(false);
+  };
+
+  const sendReason = (reason: DownReason, text?: string) => {
+    if (!pending || reasonSent) return;
+    const trimmed = text?.trim().slice(0, 200);
+    logEvent({
+      type: 'feedback_reason',
+      question_id: pending.question_id,
+      reason,
+      ...(trimmed ? { text: trimmed } : {}),
+    });
+    setReasonSent(true);
+    setOtherOn(false);
   };
 
   const toggleOthers = () => {
@@ -250,7 +287,18 @@ export function Practice() {
           </>
         )}
 
-        {pending && !learn && chosen && <Choice option={chosen} />}
+        {pending && !learn && chosen && (
+          <>
+            <Choice option={chosen} />
+            <div className={styles.verdict} role="status" aria-live="polite" data-testid="verdict">
+              <p className={pending.correct ? styles.ok : styles.ng}>
+                <span aria-hidden="true">{pending.correct ? '✓' : '✕'}</span>
+                {pending.correct ? '答對了！' : '這題答錯了'}
+              </p>
+              <p className={styles.one}>{optionLine(chosen)}</p>
+            </div>
+          </>
+        )}
 
         {learn && pending && (
           <section className={styles.learn} aria-label="解析">
@@ -280,6 +328,52 @@ export function Practice() {
                 </button>
               ))}
             </div>
+            {feedback === 'down' && (
+              reasonSent ? (
+                <p className={styles.reasonThanks} role="status">謝謝，我們會改進這題。</p>
+              ) : (
+                <div className={styles.reason} role="group" aria-label="哪裡沒幫助？">
+                  <p className={styles.reasonAsk}>哪裡沒幫助？</p>
+                  <div className={styles.chips}>
+                    {DOWN_REASONS.map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        className={styles.chip}
+                        aria-pressed={otherOn && r.id === 'other'}
+                        onClick={() => {
+                          if (r.id === 'other') setOtherOn(true);
+                          else sendReason(r.id);
+                        }}
+                      >
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+                  {otherOn && (
+                    <div className={styles.reasonRow}>
+                      <label className={styles.srOnly} htmlFor="reason-other">想說什麼都可以</label>
+                      <input
+                        id="reason-other"
+                        className={styles.reasonInput}
+                        maxLength={200}
+                        placeholder="想說什麼都可以"
+                        value={otherText}
+                        onChange={(e) => setOtherText(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className={styles.reasonSend}
+                        onClick={() => sendReason('other', otherText)}
+                        disabled={otherText.trim().length === 0}
+                      >
+                        送出
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            )}
 
             <button
               type="button"
@@ -309,20 +403,7 @@ export function Practice() {
       </div>
 
       {pending && chosen && (
-        <footer
-          ref={dockRef}
-          className={`${styles.dock} ${learn ? styles.dockPlain : pending.correct ? styles.sheetOk : styles.sheetNg}`}
-          data-testid="sheet"
-        >
-          {!learn && (
-            <div role="status" aria-live="polite">
-              <p className={pending.correct ? styles.ok : styles.ng}>
-                <span aria-hidden="true">{pending.correct ? '✓' : '✕'}</span>
-                {pending.correct ? '答對了！' : '這題答錯了'}
-              </p>
-              <p className={styles.one}>{optionLine(chosen)}</p>
-            </div>
-          )}
+        <footer ref={dockRef} className={`${styles.dock} ${styles.dockPlain}`} data-testid="sheet">
           <Go label="繼續" onClick={next} buttonRef={continueRef} />
         </footer>
       )}
@@ -351,6 +432,20 @@ function WrapUp({
   const wrap = last.wrap_up;
   const start = getItem<string | null>('journey_start', null);
   const days = weekOf(date);
+  const unitId = wrap?.unit_id ?? last.id;
+  const [useful, setUseful] = useState<UsefulAnswer | null>(() => {
+    const saved = getItem<Record<string, UsefulAnswer>>('unit_useful', {});
+    return saved[date] ?? null;
+  });
+
+  const pickUseful = (value: UsefulAnswer) => {
+    if (useful) return;
+    const saved = getItem<Record<string, UsefulAnswer>>('unit_useful', {});
+    saved[date] = value;
+    setItem('unit_useful', saved);
+    logEvent({ type: 'unit_useful', unit_id: unitId, answer: value });
+    setUseful(value);
+  };
 
   return (
     <main ref={pageRef} className={styles.page}>
@@ -404,6 +499,22 @@ function WrapUp({
         </div>
       </div>
       <footer ref={dockRef} className={`${styles.dock} ${styles.dockPlain}`} data-testid="sheet">
+        <div className={styles.useful} role="group" aria-label="今天學的，你這週用得到嗎？">
+          {useful ? (
+            <p className={styles.usefulThanks} role="status">收到！</p>
+          ) : (
+            <>
+              <p className={styles.usefulAsk}>今天學的，你這週用得到嗎？</p>
+              <div className={styles.chips}>
+                {USEFUL.map((u) => (
+                  <button key={u.id} type="button" className={styles.chip} onClick={() => pickUseful(u.id)}>
+                    {u.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
         <Go label="完成" onClick={() => navigate('/')} />
       </footer>
     </main>

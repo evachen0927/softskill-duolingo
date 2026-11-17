@@ -17,6 +17,16 @@ npm run test:rules   # Firestore 安全規則測試（需要 Java，會下載 Em
 - 部署到子路徑：`VITE_BASE=/repo-name/ npm run build`
 - Firebase 環境變數見 `.env.example`；沒設定時 App 以離線模式運作，事件存在 `softskill_event_queue`。
 
+## 每週回報
+從 Firestore 的 `events` 印出近 N 天的 Markdown 回報（繁體中文）。金鑰只放在環境變數，不要寫進檔案，也不要把報告提交進這個公開的 repo。
+
+```bash
+FIREBASE_SERVICE_ACCOUNT='{"type":"service_account",...}' node scripts/weekly-report.mjs
+FIREBASE_SERVICE_ACCOUNT='...' EXCLUDE_DEVICES='測試機device_id,另一台' node scripts/weekly-report.mjs --days 7
+```
+
+`EXCLUDE_DEVICES` 是逗號分隔的 `device_id`，這些裝置的事件不會進報告。`--days` 預設 7。
+
 ## 目前進度
 - [x] 第 0 批：專案骨架、底部四 tab、每日出題規則（`src/lib/dailySet.ts`）
 - [x] 第 1 批：痛點引導、擊掌承諾、提醒時間、`#/debug`

@@ -9,13 +9,37 @@ service cloud.firestore {
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.keys().hasOnly([
              'device_id', 'uid', 'type', 'question_id', 'choice', 'correct', 'feedback',
-             'slot', 'review', 'permission', 'tab', 'platform', 'standalone', 'ts'
+             'slot', 'review', 'permission', 'tab', 'reason', 'text', 'answer', 'unit_id',
+             'platform', 'standalone', 'ts'
            ])
         && request.resource.data.type in [
              'onboarding_done', 'commit', 'notif_permission', 'answer',
-             'explanation_viewed', 'feedback', 'day_complete', 'feature_interest'
+             'explanation_viewed', 'feedback', 'day_complete', 'feature_interest',
+             'feedback_reason', 'unit_useful', 'feature_wish', 'tab_view'
            ]
         && (request.resource.data.type != 'feature_interest' || request.resource.data.tab is string)
+        && (request.resource.data.type != 'tab_view' || request.resource.data.tab is string)
+        && (request.resource.data.type != 'feature_wish' || (
+             request.resource.data.tab is string
+             && request.resource.data.text is string
+             && request.resource.data.text.size() > 0
+             && request.resource.data.text.size() <= 300
+           ))
+        && (request.resource.data.type != 'feedback_reason' || (
+             request.resource.data.question_id is string
+             && request.resource.data.reason in ['too_easy', 'irrelevant', 'unclear', 'other']
+           ))
+        && (request.resource.data.type != 'unit_useful' || (
+             request.resource.data.unit_id is string
+             && request.resource.data.answer in ['yes', 'maybe', 'no']
+           ))
+        && (!('text' in request.resource.data) || (
+             request.resource.data.text is string
+             && request.resource.data.text.size() <= 300
+           ))
+        && (!('reason' in request.resource.data) || request.resource.data.reason in ['too_easy', 'irrelevant', 'unclear', 'other'])
+        && (!('answer' in request.resource.data) || request.resource.data.answer in ['yes', 'maybe', 'no'])
+        && (!('unit_id' in request.resource.data) || request.resource.data.unit_id is string)
         && request.resource.data.device_id is string
         && request.resource.data.ts is string
         && request.resource.data.platform in ['ios', 'android', 'desktop']

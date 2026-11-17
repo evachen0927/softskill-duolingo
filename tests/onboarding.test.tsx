@@ -208,8 +208,8 @@ describe('匯出 CSV', () => {
       { device_id: 'd1', uid: null, type: 'commit', platform: 'ios', standalone: true, ts: '2026-11-16T12:00:00.000Z' },
     ]);
     const [header, row] = csv.trim().split('\r\n');
-    expect(header).toBe('device_id,uid,type,question_id,choice,correct,feedback,slot,review,permission,tab,platform,standalone,ts');
-    expect(row).toBe('d1,,commit,,,,,,,,,ios,true,2026-11-16T12:00:00.000Z');
+    expect(header).toBe('device_id,uid,type,question_id,choice,correct,feedback,slot,review,permission,tab,reason,text,answer,unit_id,platform,standalone,ts');
+    expect(row).toBe('d1,,commit,,,,,,,,,,,,,ios,true,2026-11-16T12:00:00.000Z');
   });
 
   it('本機資料 CSV 一列一個 key，不重複放事件', () => {

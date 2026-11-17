@@ -47,6 +47,19 @@
   text-decoration: none;
 }
 button.button { width: 100%; border: 0; font: inherit; font-weight: 700; cursor: pointer; }
+button.button:disabled { opacity: 0.45; cursor: default; }
+.wish { margin-top: 8px; }
+.wishLabel { display: block; margin: 8px 0; font-weight: 700; }
+.wishInput {
+  width: 100%;
+  min-height: 88px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  resize: vertical;
+}
 .card .button + .button { margin-top: 10px; }
 .danger { background: #C0392B; }
 .ghost { background: transparent; color: var(--text); border: 2px solid var(--line) !important; }

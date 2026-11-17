@@ -12,7 +12,10 @@ export type StorageKey =
   | 'feedback'
   | 'journey_start'
   | 'event_queue'
-  | 'feature_interest';
+  | 'feature_interest'
+  | 'feature_wish'
+  | 'tab_view_day'
+  | 'unit_useful';
 
 export function getItem<T>(key: StorageKey, fallback: T): T {
   try {

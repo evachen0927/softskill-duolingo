@@ -1,7 +1,7 @@
 /** 純函式的 CSV 工具，前端 #/debug 和 scripts/export-events.ts 共用。 */
 export const EVENT_COLUMNS = [
   'device_id', 'uid', 'type', 'question_id', 'choice', 'correct', 'feedback',
-  'slot', 'review', 'permission', 'tab', 'platform', 'standalone', 'ts',
+  'slot', 'review', 'permission', 'tab', 'reason', 'text', 'answer', 'unit_id', 'platform', 'standalone', 'ts',
 ] as const;
 
 function cell(v: unknown): string {

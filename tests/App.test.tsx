@@ -61,6 +61,15 @@ describe('底部四個 tab（引導完成後）', () => {
     go('#/ai');
     fireEvent.click(screen.getByRole('button', { name: '我想要這個功能' }));
     expect(getItem<AppEvent[]>('event_queue', []).filter((e) => e.type === 'feature_interest').map((e) => e.tab)).toEqual(['題庫', 'AI 對話練習']);
+    expect(screen.getByLabelText('你最希望它幫你做什麼？')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('你最希望它幫你做什麼？'), { target: { value: '可以重練錯題' } });
+    fireEvent.click(screen.getByRole('button', { name: '送出' }));
+    expect(screen.getByText('謝謝你的想法！')).toBeInTheDocument();
+    expect(getItem<AppEvent[]>('event_queue', []).filter((e) => e.type === 'feature_wish')).toEqual([
+      expect.objectContaining({ tab: 'AI 對話練習', text: '可以重練錯題' }),
+    ]);
+    const views = getItem<AppEvent[]>('event_queue', []).filter((e) => e.type === 'tab_view').map((e) => e.tab);
+    expect(views).toEqual(['題庫', 'AI 對話練習']);
   });
 
   it('不存在的路徑回到首頁，不出錯', () => {

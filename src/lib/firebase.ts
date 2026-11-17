@@ -14,7 +14,11 @@ export type EventType =
   | 'explanation_viewed'
   | 'feedback'
   | 'day_complete'
-  | 'feature_interest';
+  | 'feature_interest'
+  | 'feedback_reason'
+  | 'unit_useful'
+  | 'feature_wish'
+  | 'tab_view';
 
 export type Platform = 'ios' | 'android' | 'desktop';
 
@@ -32,8 +36,16 @@ export interface AppEvent {
   slot?: number | null;
   review?: boolean | null;
   permission?: PermissionResult | null;
-  /** feature_interest：哪個即將推出的分頁 */
+  /** feature_interest / feature_wish / tab_view：哪個即將推出的分頁 */
   tab?: string | null;
+  /** feedback_reason：too_easy | irrelevant | unclear | other */
+  reason?: 'too_easy' | 'irrelevant' | 'unclear' | 'other' | null;
+  /** feedback_reason 的「其他」，或 feature_wish 的想法。最多 300 字。 */
+  text?: string | null;
+  /** unit_useful：yes | maybe | no */
+  answer?: 'yes' | 'maybe' | 'no' | null;
+  /** unit_useful：單元代號，例如 u1 */
+  unit_id?: string | null;
   platform: Platform;
   standalone: boolean;
   ts: string; // ISO 8601

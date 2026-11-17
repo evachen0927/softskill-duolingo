@@ -222,6 +222,8 @@ describe('出題畫面', () => {
     expect(screen.getByText('收到，謝謝你！')).toBeInTheDocument();
     fireEvent.click(down);
     expect(screen.getByText('收到，我們會改這題。')).toBeInTheDocument();
+    expect(screen.getByText('哪裡沒幫助？')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '繼續' })).toBeEnabled();
     fireEvent.click(down);
     expect(down).toHaveAttribute('aria-pressed', 'true');
     expect(up).toHaveAttribute('aria-pressed', 'false');
@@ -231,6 +233,38 @@ describe('出題畫面', () => {
     expect(screen.getByLabelText('第 2 題，共 3 題')).toBeInTheDocument();
     expect(screen.getByText('上司')).toBeInTheDocument();
     expect(screen.getByText('官網改版現在怎樣？')).toBeInTheDocument();
+  });
+
+  it('👎 可以選原因，選其他要送出，不回答也能繼續', async () => {
+    await render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: /^A/ }));
+    cont();
+    fireEvent.click(screen.getByRole('button', { name: '沒幫助' }));
+    fireEvent.click(screen.getByRole('button', { name: '太簡單' }));
+    expect(screen.getByText('謝謝，我們會改進這題。')).toBeInTheDocument();
+    expect(events().filter((e) => e.type === 'feedback_reason')).toEqual([
+      expect.objectContaining({ question_id: 'u1q1', reason: 'too_easy' }),
+    ]);
+    expect(screen.queryByRole('button', { name: '太簡單' })).not.toBeInTheDocument();
+    cont();
+    expect(screen.getByLabelText('第 2 題，共 3 題')).toBeInTheDocument();
+  });
+
+  it('收尾可以不回答用得到，回答後記 unit_useful 並顯示收到', async () => {
+    await render(<App />);
+    for (let i = 0; i < 3; i++) {
+      fireEvent.click(screen.getByRole('button', { name: /^B/ }));
+      cont();
+      cont();
+    }
+    expect(screen.getByText('今天學的，你這週用得到嗎？')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '用得到' }));
+    expect(screen.getByText('收到！')).toBeInTheDocument();
+    expect(events().filter((e) => e.type === 'unit_useful')).toEqual([
+      expect.objectContaining({ unit_id: 'u1', answer: 'yes' }),
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: '完成' }));
+    expect(await screen.findByText('今天完成了')).toBeInTheDocument();
   });
 
   it('跑完 3 題：背景逐題變亮、收尾後回首頁，三題都進過第 2 步才算完成', async () => {

@@ -37,6 +37,25 @@ test('四個 tab 都能切換，390px 截圖，console 無錯誤', async ({ page
   expect(errors).toEqual([]);
 });
 
+test('即將推出：許願是選填，送出後道謝', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => {
+    localStorage.setItem('softskill_pain_points', '["unsure"]');
+    localStorage.setItem('softskill_committed_at', JSON.stringify(new Date().toISOString()));
+    localStorage.setItem('softskill_reminder_time', '"20:00"');
+  });
+  await page.reload();
+  await page.getByRole('navigation', { name: '主要導覽' }).getByRole('link', { name: '題庫' }).click();
+  await page.getByRole('button', { name: '我想要這個功能' }).click();
+  await expect(page.getByText('你最希望它幫你做什麼？')).toBeVisible();
+  await page.screenshot({ path: 'screenshots/batch0/05-feature-wish.png' });
+  await page.getByLabel('你最希望它幫你做什麼？').fill('可以重練錯題');
+  await page.getByRole('button', { name: '送出' }).click();
+  await expect(page.getByText('謝謝你的想法！')).toBeVisible();
+  await page.getByRole('link', { name: '回到首頁' }).click();
+  await expect(page.getByRole('link', { name: '開始今天的練習' })).toBeVisible();
+});
+
 test('PWA 可安裝：manifest 正確、service worker 生效、Chrome 回報無安裝障礙', async () => {
   // 用一般（非無痕）profile，Chrome 才會回報真實的安裝判斷
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'pw-pwa-'));

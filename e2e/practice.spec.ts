@@ -62,10 +62,14 @@ test('跑完一天 3 題：兩步解析、場景佔位、完成回首頁', async
   await expect(page.getByRole('list', { name: '選項' })).toHaveCount(0);
   await expect(page.getByTestId('boss')).toHaveCount(0);
   const chosen = (await page.getByTestId('chosen').boundingBox())!;
-  const sheet = (await page.getByTestId('sheet').boundingBox())!;
-  const gap = sheet.y - (chosen.y + chosen.height);
-  expect(gap).toBeGreaterThanOrEqual(8);
-  expect(gap).toBeLessThanOrEqual(42);
+  const sceneBox = (await page.getByTestId('scene').boundingBox())!;
+  const verdict = (await page.getByTestId('verdict').boundingBox())!;
+  const underScene = chosen.y - (sceneBox.y + sceneBox.height);
+  const underChoice = verdict.y - (chosen.y + chosen.height);
+  expect(underScene).toBeGreaterThanOrEqual(8);
+  expect(underScene).toBeLessThanOrEqual(24);
+  expect(underChoice).toBeGreaterThanOrEqual(4);
+  expect(underChoice).toBeLessThanOrEqual(24);
   await page.screenshot({ path: shot('02-q1-step1') });
 
   await page.getByRole('button', { name: '繼續' }).click();
@@ -116,7 +120,10 @@ test('跑完一天 3 題：兩步解析、場景佔位、完成回首頁', async
 
   await expect(page.getByRole('heading', { name: /今天學會：先講結論/ })).toBeVisible();
   await expect(page.getByTestId('wrap-streak')).toHaveText('1');
+  await expect(page.getByText('今天學的，你這週用得到嗎？')).toBeVisible();
   await page.screenshot({ path: shot('09-wrap') });
+  await page.getByRole('button', { name: '用得到' }).click();
+  await expect(page.getByText('收到！')).toBeVisible();
   await page.getByRole('button', { name: '完成' }).click();
 
   await expect(page).toHaveURL(/#\/$/);
@@ -130,7 +137,7 @@ test('跑完一天 3 題：兩步解析、場景佔位、完成回首頁', async
   expect(types).toEqual([
     'answer#1', 'feedback', 'explanation_viewed#1',
     'answer#2', 'explanation_viewed#2',
-    'answer#3', 'explanation_viewed#3', 'day_complete',
+    'answer#3', 'explanation_viewed#3', 'day_complete', 'unit_useful',
   ]);
 
   await page.goto('/#/practice');
@@ -177,6 +184,48 @@ test('prefers-reduced-motion：不出場、亮度直接切換', async ({ page })
   expect(await brightnessOf(page)).toBe('brightness(0.7)');
   const running = await page.evaluate(() => [...document.querySelectorAll('.char svg *')].filter((e) => getComputedStyle(e).animationName !== 'none').length);
   expect(running).toBe(0);
+});
+
+test('第 1 步：選項貼在插畫下面，回饋接著出現，三種高度的繼續都固定', async ({ page }) => {
+  for (const [width, height] of [[390, 844], [390, 985], [375, 667]] as const) {
+    await page.setViewportSize({ width, height });
+    await page.goto('/');
+    await page.evaluate(() => localStorage.clear());
+    await onboard(page);
+    await page.goto('/#/practice');
+    await page.getByRole('button', { name: /^A/ }).click();
+    const sceneBox = (await page.getByTestId('scene').boundingBox())!;
+    const chosen = (await page.getByTestId('chosen').boundingBox())!;
+    const verdict = (await page.getByTestId('verdict').boundingBox())!;
+    const underScene = chosen.y - (sceneBox.y + sceneBox.height);
+    expect(underScene, `${width}x${height} scene`).toBeGreaterThanOrEqual(8);
+    expect(underScene, `${width}x${height} scene`).toBeLessThanOrEqual(24);
+    const underChoice = verdict.y - (chosen.y + chosen.height);
+    expect(underChoice, `${width}x${height} verdict`).toBeGreaterThanOrEqual(4);
+    expect(underChoice, `${width}x${height} verdict`).toBeLessThanOrEqual(24);
+    const btn = (await page.getByRole('button', { name: '繼續' }).boundingBox())!;
+    expect(btn.y + btn.height).toBeLessThanOrEqual(height + 1);
+    expect(btn.y).toBeGreaterThan(height - 140);
+    if (width === 390 && height === 844) await page.screenshot({ path: shot('11-step1-844') });
+  }
+});
+
+test('👎 之後可以選原因，繼續不會被擋住', async ({ page }) => {
+  await onboard(page);
+  await page.goto('/#/practice');
+  await page.getByRole('button', { name: /^A/ }).click();
+  await page.getByRole('button', { name: '繼續' }).click();
+  await page.getByRole('button', { name: '沒幫助' }).click();
+  await expect(page.getByText('哪裡沒幫助？')).toBeVisible();
+  await page.screenshot({ path: shot('12-down-reason') });
+  await page.getByRole('button', { name: '其他', exact: true }).click();
+  await page.getByPlaceholder('想說什麼都可以').fill('例子太長');
+  await page.getByRole('button', { name: '送出' }).click();
+  await expect(page.getByText('謝謝，我們會改進這題。')).toBeVisible();
+  const cont = (await page.getByRole('button', { name: '繼續' }).boundingBox())!;
+  expect(cont.y + cont.height).toBeLessThanOrEqual(844);
+  await page.getByRole('button', { name: '繼續' }).click();
+  await expect(page.getByLabel('第 2 題，共 3 題')).toBeVisible();
 });
 
 test('375×667 展開其他選項時，繼續仍固定在底部', async ({ page }) => {

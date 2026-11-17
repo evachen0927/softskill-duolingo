@@ -16,6 +16,8 @@ export interface WrapUp {
   learned: string;
   /** 下一句預告，例如「明天會練「報告壞消息」。」 */
   next: string;
+  /** 回報用的單元代號，例如 u1 */
+  unit_id?: string;
 }
 
 export interface Question {
